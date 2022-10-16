@@ -43,7 +43,7 @@ end
 fullstack(vs::Vector{T}) where T<:Real = vs
 
 concat(alist::Vector{Vector{T}}) where T = foldl(++, alist; init=T[])
-
+concat(alist::Vector{T}) where T<:Real = alist
 
 Empty(ns::Vector{T}) where T<:Real = T[]
 (Empty(ns::Vector{Vector{T}})::Vector{Vector{T}}) where T<:Real = map(Empty, ns)
@@ -69,3 +69,24 @@ from_array(a::Array) = begin
     end
 end
 
+squeeze(vs::Vector{T}) where T = begin 
+    length(nvsize(vs))==1 && return vs
+    len(vs)==1 && return squeeze(vs[1])
+    map(vs) do v 
+        return squeeze(v)
+    end
+end
+
+cast(vs::Vector{T}, t::Type{T2}) where {T, T2<:Real} = begin 
+    T <: Real && return map(t, vs)
+    return map(v->cast(v, t), vs) 
+end
+
+transpose(ns::Vector{Vector{T}}) where T = begin 
+    inner_len = nvsize(ns)[2]
+    map(1:inner_len) do i 
+        map(1:len(ns)) do j 
+            ns[j][i]
+        end |> concat
+    end
+end
