@@ -1,24 +1,44 @@
 
 const Maybe{T} = Union{T, Nothing}
 
+"""
+I do consider in the situations below, the alias of length function(just the pythonic `len` function) would be convenient.
+"""
 len(vs::Vector{T}) where T = length(vs)
 len(d::Dict) = length(d)
+len(s::String) = length(s)
+len(t::Tuple) = length(t)
 
-
-"""Monad bind: M [a] -> ([a] -> b) -> M b"""
+"""
+Monad bind: M [a] -> ([a] -> b) -> M b
+this one is really convenient
+"""
 maybebind(x::Maybe{T}, f::Function) where T = begin
     x isa Nothing && return x 
     return f(x)
 end
 
-(find_item_index(vs::Vector{T}, item::T, index::Int)::Maybe{Int}) where T = begin 
+const ViewType{T} = SubArray{T, 1, Vector{T}, Tuple{UnitRange{Int64}}, true}
+const VVector{T} = Union{Vector{T}, ViewType{T}}
+
+"""
+will this one be cheaper than the previous one?
+"""
+(find_item_index(vs::VVector{T}, item::T, index::Int)::Maybe{Int}) where T = begin 
+    length(vs)==0 && return nothing
+    vs[1]==item && return index 
+    return find_item_index(view(vs, 2:len(vs)), item, index+1)
+end
+
+(find_item_index(vs::Vector{T}, item::T, index::Int, ::Val{:old})::Maybe{Int}) where T = begin 
     length(vs)==0 && return nothing
     vs[1]==item && return index 
     return find_item_index(vs[2:end], item, index+1)
 end
-(find_unique_item_index(vs::Vector{T}, item::T)::Int) where T = begin 
+
+(find_unique_item_index(vs::VVector{T}, item::T)::Int) where T = begin 
     maybe_index = find_item_index(vs, item, 1)
-    @assert maybebind(maybe_index, i->find_item_index(vs[i+1:end], item, 1)) isa Nothing 
+    @assert maybebind(maybe_index, i->find_item_index(view(vs, i+1:len(vs)), item, 1)) isa Nothing 
     return maybe_index
 end
 
@@ -82,11 +102,50 @@ cast(vs::Vector{T}, t::Type{T2}) where {T, T2<:Real} = begin
     return map(v->cast(v, t), vs) 
 end
 
-transpose(ns::Vector{Vector{T}}) where T = begin 
+const AtLeast2D{T} = Vector{Vector{T}}
+transpose(ns::AtLeast2D{T}) where T = begin 
     inner_len = nvsize(ns)[2]
     map(1:inner_len) do i 
         map(1:len(ns)) do j 
             ns[j][i]
         end |> concat
     end
+end
+
+#TODO: fix this, originally, the inner most vector is always [x] in MaybeTensor.jl, I need to modify this
+transpose(ns::AtLeast2D{T}, startIndex::Int) where T = begin 
+    startIndex==1 && return transpose(ns)
+    return map(x->transpose(x, startIndex-1), ns)
+end
+
+struct StartIndex 
+    index::Int
+end
+
+"""
+    (1, 2, 3) -> (2, 3, 1) -> (1, 2), (2, 3)
+    (1, 2, 3) -> (3, 1, 2) -> (2, 3), (1, 2)
+    (1, 2, 3) -> (3, 2, 1) -> (1, 2), (2, 3), (1, 2)
+"""
+transpose_schedule(orders::Vector{Int}, schedule::Vector{StartIndex}) = begin
+    len(orders)==0 && return schedule
+    o, os = orders[end], orders[1:end-1]    
+    schedule = schedule ++ map(StartIndex, o:len(orders)-1)
+
+    len(os)==0 && return schedule
+
+    nos = map(os) do oi 
+        oi > o && return oi -1 
+        oi < o && return oi
+    end
+    transpose_schedule(nos, schedule)
+end
+transpose_schedule(orders::Vector{Int}) = transpose_schedule(orders, StartIndex[])
+
+
+(transpose(ns::AtLeast2D{T}, schedule::Vector{StartIndex})::AtLeast2D{T}) where T = begin
+    return foldl((ns, s)->transpose(ns, s.index), schedule; init=ns)
+end
+(transpose(ns::AtLeast2D{T}, targetVec::Vector{Int})::AtLeast2D{T}) where T = begin
+    return transpose(ns, transpose_schedule(targetVec))
 end
