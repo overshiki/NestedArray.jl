@@ -1,6 +1,12 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.7.1"
+julia_version = "1.8.2"
 manifest_format = "2.0"
+project_hash = "e5ccc94d6123b3c3e906fa37b3de47216b90b5b2"
 
-[deps]
+[[deps.EasyMonad]]
+git-tree-sha1 = "68f177423d54fb2c544546a7e0f32a9d99af6407"
+repo-rev = "main"
+repo-url = "https://github.com/overshiki/EasyMonad.jl.git"
+uuid = "e4dbf12b-b8cf-4673-b6eb-8b0d4667dd49"
+version = "0.1.0"

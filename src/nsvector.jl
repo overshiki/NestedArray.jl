@@ -1,5 +1,6 @@
 
-const Maybe{T} = Union{T, Nothing}
+# const Maybe{T} = Union{T, Nothing}
+using EasyMonad
 
 """
 I do consider in the situations below, the alias of length function(just the pythonic `len` function) would be convenient.
@@ -9,14 +10,14 @@ len(d::Dict) = length(d)
 len(s::String) = length(s)
 len(t::Tuple) = length(t)
 
-"""
-Monad bind: M [a] -> ([a] -> b) -> M b
-this one is really convenient
-"""
-maybebind(x::Maybe{T}, f::Function) where T = begin
-    x isa Nothing && return x 
-    return f(x)
-end
+# """
+# Monad bind: M [a] -> ([a] -> b) -> M b
+# this one is really convenient
+# """
+# maybebind(x::Maybe{T}, f::Function) where T = begin
+#     x isa Nothing && return x 
+#     return f(x)
+# end
 
 const ViewType{T} = SubArray{T, 1, Vector{T}, Tuple{UnitRange{Int64}}, true}
 const VVector{T} = Union{Vector{T}, ViewType{T}}
@@ -39,7 +40,7 @@ end
 
 (find_unique_item_index(vs::VVector{T}, item::T)::Int) where T = begin 
     maybe_index = find_item_index(vs, item, 1)
-    @assert maybebind(maybe_index, i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
+    @assert (maybe_index >> i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
     return maybe_index
 end
 
