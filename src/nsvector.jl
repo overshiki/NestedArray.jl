@@ -23,11 +23,12 @@ const VVector{T} = Union{Vector{T}, ViewType{T}}
 
 """
 will this one be cheaper than the previous one?
+Yes, but still not as good as in a simple for loop... since in julia, deep recursive may resulted in stackoverflow
 """
 (find_item_index(vs::VVector{T}, item::T, index::Int)::Maybe{Int}) where T = begin 
     length(vs)==0 && return nothing
     vs[1]==item && return index 
-    return find_item_index(view(vs, 2:len(vs)), item, index+1)
+    return find_item_index(view(vs, 2:length(vs)), item, index+1)
 end
 
 (find_item_index(vs::Vector{T}, item::T, index::Int, ::Val{:old})::Maybe{Int}) where T = begin 
@@ -38,8 +39,20 @@ end
 
 (find_unique_item_index(vs::VVector{T}, item::T)::Int) where T = begin 
     maybe_index = find_item_index(vs, item, 1)
-    @assert maybebind(maybe_index, i->find_item_index(view(vs, i+1:len(vs)), item, 1)) isa Nothing 
+    @assert maybebind(maybe_index, i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
     return maybe_index
+end
+
+(find_index(vs::Vector{T}, v::T, ::Val{:recursive})::Maybe{Int}) where T = find_item_index(vs, v, 1)
+"""
+To find the index of an item in a vector. If it does not exist in the vector, just return nothing
+by default, I recommend using this simple loop version.
+"""
+(find_index(vs::Vector{T}, v::T)::Maybe{Int}) where T = begin 
+    for (index, iv) in enumerate(vs) 
+        iv==v && return index
+    end
+    return nothing
 end
 
 
