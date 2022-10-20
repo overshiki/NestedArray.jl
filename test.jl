@@ -43,6 +43,7 @@ test2() = begin
     @show @allocated find_item_index(a, 1.0, 1, Val(:old))
     @show @allocated find_index(a, 1.0, Val(:recursive))
     @show @allocated find_index(a, 1.0)
+    @show find_unique_index(a, 1.0)
 end
 
 test()

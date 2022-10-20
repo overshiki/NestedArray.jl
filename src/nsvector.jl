@@ -1,7 +1,7 @@
 
 # const Maybe{T} = Union{T, Nothing}
 using EasyMonad
-
+import EasyMonad.(>>)
 """
 I do consider in the situations below, the alias of length function(just the pythonic `len` function) would be convenient.
 """
@@ -38,7 +38,7 @@ end
     return find_item_index(vs[2:end], item, index+1)
 end
 
-(find_unique_item_index(vs::VVector{T}, item::T)::Int) where T = begin 
+(find_unique_index(vs::VVector{T}, item::T)::Int) where T = begin 
     maybe_index = find_item_index(vs, item, 1)
     @assert (maybe_index >> i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
     return maybe_index
@@ -93,6 +93,13 @@ end
     Tuple(svec)
 end
 
+hsplit(a::Array)::Vector{Array} = begin 
+    asize = size(a)
+    v = asize[1]
+    map(1:v) do i 
+        return Array(selectdim(a, 1, i))
+    end
+end
 
 from_array(a::Array) = begin 
     asize = size(a)
