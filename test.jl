@@ -39,7 +39,9 @@ test2() = begin
     a[99] = 1.0
     @show @allocated find_item_index(a, 1.0, 1)
     @show @allocated find_item_index(a, 1.0, 1, Val(:old))
+    @show @allocated find_index(a, 1.0, Val(:recursive))
+    @show @allocated find_index(a, 1.0)
 end
 
-test()
+# test()
 test2()
