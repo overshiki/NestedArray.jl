@@ -29,7 +29,9 @@ test() = begin
 
     a = rand(Float32, (4,3,2))
     vs = from_array(a)
-    vs = transpose(vs, [3,2,1])
+
+
+    # vs = transpose(vs, [3,2,1])
     @show nvsize(vs)
     # map(x->print(size(x)), vs)
 end 
@@ -43,5 +45,5 @@ test2() = begin
     @show @allocated find_index(a, 1.0)
 end
 
-# test()
+test()
 test2()
