@@ -46,5 +46,17 @@ test2() = begin
     @show find_unique_index(a, 1.0)
 end
 
-test()
-test2()
+
+test_nvbroadcast() = begin 
+    sa = collect(1:10)
+    ns = rand(5:15, 10)
+    ssb = map(n->collect(1:n), ns)
+    # @show sa, ssb
+    func = BinaryFunction{Int, Int, Int}((x,y)->x+y)
+    ssb = nvbroadcast(sa, ssb, func)
+    @show ssb
+end
+
+# test()
+# test2()
+test_nvbroadcast()

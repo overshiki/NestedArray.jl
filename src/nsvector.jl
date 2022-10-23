@@ -10,14 +10,6 @@ len(d::Dict) = length(d)
 len(s::String) = length(s)
 len(t::Tuple) = length(t)
 
-# """
-# Monad bind: M [a] -> ([a] -> b) -> M b
-# this one is really convenient
-# """
-# maybebind(x::Maybe{T}, f::Function) where T = begin
-#     x isa Nothing && return x 
-#     return f(x)
-# end
 
 const ViewType{T} = SubArray{T, 1, Vector{T}, Tuple{UnitRange{Int64}}, true}
 const VVector{T} = Union{Vector{T}, ViewType{T}}
@@ -100,6 +92,19 @@ hsplit(a::Array)::Vector{Array} = begin
         return Array(selectdim(a, 1, i))
     end
 end
+
+(nvbroadcast(vs::Vector{T1}, vvs::Vector{Vector{T2}}, op::BinaryFunction{T1, T2, T3})::Vector{Vector{T3}}) where {T1, T2, T3} = begin 
+    @assert len(vs)==len(vvs)
+    return map(1:len(vs)) do i
+        item = vs[i]
+        vitem = vvs[i]
+        ivs = map(vitem) do item2
+            (item, item2) >> op
+        end
+        return ivs
+    end
+end
+
 
 from_array(a::Array) = begin 
     asize = size(a)
