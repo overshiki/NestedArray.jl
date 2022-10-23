@@ -1,5 +1,5 @@
 include("src/nsvector.jl")
-# using NestedArray
+# using NestedVector
 
 test() = begin 
     a = rand(Float32, (4,3,2))
