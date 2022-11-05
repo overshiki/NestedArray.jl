@@ -57,6 +57,11 @@ test_nvbroadcast() = begin
     @show ssb
 end
 
+test3() = begin 
+    @show foldvector(collect(1:10), 3)
+end
+
 # test()
 # test2()
-test_nvbroadcast()
+# test_nvbroadcast()
+test3()

@@ -123,6 +123,20 @@ squeeze(vs::Vector{T}) where T = begin
     end
 end
 
+(foldvector(srcv::Vector{T}, targetvv::Vector{Vector{T}}, num::Int)::Vector{Vector{T}}) where T = begin 
+    length(srcv)==0 && return targetvv 
+    nnum = min(length(srcv), num)
+    x, xs = srcv[1:nnum], srcv[nnum+1:end]
+    push!(targetvv, x)
+    return foldvector(xs, targetvv, num)
+end
+(foldvector(srcv::Vector{T}, num::Int)::Vector{Vector{T}}) where T = begin 
+    targetvv = Vector{T}[]
+    return foldvector(srcv, targetvv, num)
+end
+
+
+
 cast(vs::Vector{T}, t::Type{T2}) where {T, T2<:Real} = begin 
     T <: Real && return map(t, vs)
     return map(v->cast(v, t), vs) 
