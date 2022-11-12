@@ -61,7 +61,17 @@ test3() = begin
     @show foldvector(collect(1:10), 3)
 end
 
+test_transpose() = begin 
+    a = [[1,2,3], [4,5,6]]
+    a |> transpose
+
+    a = [["1", "2", "3"], ["4", "5", "6"]]
+    a |> transpose
+end
+
 # test()
 # test2()
 # test_nvbroadcast()
-test3()
+# test3()
+
+test_transpose()

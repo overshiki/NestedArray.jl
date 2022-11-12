@@ -5,6 +5,8 @@ import EasyMonad.(>>)
 """
 I do consider in the situations below, the alias of length function(just the pythonic `len` function) would be convenient.
 """
+const Leaf = Union{Number, String, Nothing}
+
 len(vs::Vector{T}) where T = length(vs)
 len(d::Dict) = length(d)
 len(s::String) = length(s)
@@ -66,18 +68,18 @@ end
 fullstack(vs::Vector{T}) where T<:Vector = begin
     return reduce(vcat, map(unsqueeze, map(fullstack, vs)))
 end
-fullstack(vs::Vector{T}) where T<:Real = vs
+fullstack(vs::Vector{T}) where T<:Leaf = vs
 
 concat(alist::Vector{Vector{T}}) where T = foldl(++, alist; init=T[])
-concat(alist::Vector{T}) where T<:Real = alist
+concat(alist::Vector{T}) where T<:Leaf = alist
 
-Empty(ns::Vector{T}) where T<:Real = T[]
-(Empty(ns::Vector{Vector{T}})::Vector{Vector{T}}) where T<:Real = map(Empty, ns)
+Empty(ns::Vector{T}) where T<:Leaf = T[]
+(Empty(ns::Vector{Vector{T}})::Vector{Vector{T}}) where T<:Leaf = map(Empty, ns)
 
 
 nvsize!(ns::Vector{T}, svec::Vector{Int}) where T = begin 
     push!(svec, len(ns))
-    T <: Real && return svec
+    T <: Leaf && return svec
     nvsize!(ns[1], svec)
 end
 (nvsize(ns::Vector{T})::Tuple) where T = begin 
@@ -137,8 +139,8 @@ end
 
 
 
-cast(vs::Vector{T}, t::Type{T2}) where {T, T2<:Real} = begin 
-    T <: Real && return map(t, vs)
+cast(vs::Vector{T}, t::Type{T2}) where {T, T2<:Leaf} = begin 
+    T <: Leaf && return map(t, vs)
     return map(v->cast(v, t), vs) 
 end
 
