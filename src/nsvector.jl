@@ -1,16 +1,16 @@
-
-# const Maybe{T} = Union{T, Nothing}
 using EasyMonad
-import EasyMonad.(>>)
+using MonadInterface
+import MonadInterface.(>>>)
 """
 I do consider in the situations below, the alias of length function(just the pythonic `len` function) would be convenient.
 """
 const Leaf = Union{Number, String, Nothing}
 
-len(vs::Vector{T}) where T = length(vs)
-len(d::Dict) = length(d)
-len(s::String) = length(s)
-len(t::Tuple) = length(t)
+## overloading length function turns out to be a not good idea
+# len(vs::Vector{T}) where T = length(vs)
+# len(d::Dict) = length(d)
+# len(s::String) = length(s)
+# len(t::Tuple) = length(t)
 
 
 const ViewType{T} = SubArray{T, 1, Vector{T}, Tuple{UnitRange{Int64}}, true}
@@ -34,7 +34,7 @@ end
 
 (find_unique_index(vs::VVector{T}, item::T)::Int) where T = begin 
     maybe_index = find_item_index(vs, item, 1)
-    @assert (maybe_index >> i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
+    @assert (maybe_index >>> i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
     return maybe_index
 end
 
@@ -78,7 +78,7 @@ Empty(ns::Vector{T}) where T<:Leaf = T[]
 
 
 nvsize!(ns::Vector{T}, svec::Vector{Int}) where T = begin 
-    push!(svec, len(ns))
+    push!(svec, length(ns))
     T <: Leaf && return svec
     nvsize!(ns[1], svec)
 end
@@ -96,12 +96,12 @@ hsplit(a::Array)::Vector{Array} = begin
 end
 
 (nvbroadcast(vs::Vector{T1}, vvs::Vector{Vector{T2}}, op::BinaryFunction{T1, T2, T3})::Vector{Vector{T3}}) where {T1, T2, T3} = begin 
-    @assert len(vs)==len(vvs)
-    return map(1:len(vs)) do i
+    @assert length(vs)==length(vvs)
+    return map(1:length(vs)) do i
         item = vs[i]
         vitem = vvs[i]
         ivs = map(vitem) do item2
-            (item, item2) >> op
+            (item, item2) >>> op
         end
         return ivs
     end
@@ -119,7 +119,7 @@ end
 
 squeeze(vs::Vector{T}) where T = begin 
     length(nvsize(vs))==1 && return vs
-    len(vs)==1 && return squeeze(vs[1])
+    length(vs)==1 && return squeeze(vs[1])
     map(vs) do v 
         return squeeze(v)
     end
@@ -148,7 +148,7 @@ const AtLeast2D{T} = Vector{Vector{T}}
 transpose(ns::AtLeast2D{T}) where T = begin 
     inner_len = nvsize(ns)[2]
     map(1:inner_len) do i 
-        map(1:len(ns)) do j 
+        map(1:length(ns)) do j 
             ns[j][i]
         end |> concat
     end
@@ -170,11 +170,11 @@ end
     (1, 2, 3) -> (3, 2, 1) -> (1, 2), (2, 3), (1, 2)
 """
 transpose_schedule(orders::Vector{Int}, schedule::Vector{StartIndex}) = begin
-    len(orders)==0 && return schedule
+    length(orders)==0 && return schedule
     o, os = orders[end], orders[1:end-1]    
-    schedule = schedule ++ map(StartIndex, o:len(orders)-1)
+    schedule = schedule ++ map(StartIndex, o:length(orders)-1)
 
-    len(os)==0 && return schedule
+    length(os)==0 && return schedule
 
     nos = map(os) do oi 
         oi > o && return oi -1 

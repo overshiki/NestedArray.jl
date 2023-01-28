@@ -5,3 +5,4 @@ version = "0.1.0"
 
 [deps]
 EasyMonad = "e4dbf12b-b8cf-4673-b6eb-8b0d4667dd49"
+MonadInterface = "4c81018e-a0fd-4a0d-a53b-43c59f4db333"

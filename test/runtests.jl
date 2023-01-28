@@ -1,5 +1,10 @@
-include("src/nsvector.jl")
-# using NestedVector
+# include("src/nsvector.jl")
+using Pkg 
+Pkg.activate(".")
+using NestedVector
+import NestedVector.transpose
+import NestedVector.find_item_index
+import EasyMonad.BinaryFunction
 
 test() = begin 
     a = rand(Float32, (4,3,2))
@@ -69,9 +74,9 @@ test_transpose() = begin
     a |> transpose
 end
 
-# test()
-# test2()
-# test_nvbroadcast()
-# test3()
+test()
+test2()
+test_nvbroadcast()
+test3()
 
 test_transpose()
