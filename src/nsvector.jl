@@ -1,6 +1,6 @@
 using EasyMonad
 using MonadInterface
-import MonadInterface.(>>>)
+import MonadInterface.(>>)
 """
 I do consider in the situations below, the alias of length function(just the pythonic `len` function) would be convenient.
 """
@@ -34,7 +34,7 @@ end
 
 (find_unique_index(vs::VVector{T}, item::T)::Int) where T = begin 
     maybe_index = find_item_index(vs, item, 1)
-    @assert (maybe_index >>> i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
+    @assert (maybe_index >> i->find_item_index(view(vs, i+1:length(vs)), item, 1)) isa Nothing 
     return maybe_index
 end
 
@@ -101,7 +101,7 @@ end
         item = vs[i]
         vitem = vvs[i]
         ivs = map(vitem) do item2
-            (item, item2) >>> op
+            (item, item2) >> op
         end
         return ivs
     end
