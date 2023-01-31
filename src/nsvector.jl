@@ -73,6 +73,9 @@ fullstack(vs::Vector{T}) where T<:Leaf = vs
 concat(alist::Vector{Vector{T}}) where T = foldl(++, alist; init=T[])
 concat(alist::Vector{T}) where T<:Leaf = alist
 
+fast_concat(alist::Vector{Vector{T}}) where T = foldl(append!, alist; init=T[])
+fast_concat(alist::Vector{T}) where T<:Leaf = alist
+
 Empty(ns::Vector{T}) where T<:Leaf = T[]
 (Empty(ns::Vector{Vector{T}})::Vector{Vector{T}}) where T<:Leaf = map(Empty, ns)
 
